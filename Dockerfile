@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # HERMES_HOME points at the mounted volume — config, login (auth.json),
 # memory, and skills live here so redeploys never lose them.
 ENV HERMES_HOME=/data/.hermes
-ENV PATH="/root/.local/bin:${PATH}"
+ENV PATH="/data/.hermes/bin:/root/.local/bin:${PATH}"
 
 # System dependencies.
 RUN apt-get update && apt-get install -y \
@@ -25,7 +25,10 @@ RUN curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
 # The base installer leaves messaging backends (telegram/discord/slack) for
 # lazy-install. Bake the Telegram dependency into the image so it survives every
 # redeploy instead of vanishing with the ephemeral container layer.
-RUN /usr/local/lib/hermes-agent/venv/bin/python -m pip install \
+# Hermes uses a uv-managed venv (no pip inside), so install via uv, targeting
+# the venv's interpreter directly.
+RUN "${HERMES_HOME}/bin/uv" pip install \
+    --python /usr/local/lib/hermes-agent/venv/bin/python \
     "python-telegram-bot[webhooks]==22.6"
 
 COPY entrypoint.sh /entrypoint.sh
