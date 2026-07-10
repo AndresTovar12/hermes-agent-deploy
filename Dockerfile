@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     git \
     bash \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # HERMES_HOME points at the mounted volume, not the image filesystem.
